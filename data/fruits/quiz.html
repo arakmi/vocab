@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Fruits - 3 Niveaux</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+            border-radius: 20px 20px 0 0;
+        }
+
+        .home-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .home-btn:hover {
+            transform: translateY(-2px) scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-top: 20px;
+        }
+
+        .quiz-title {
+            font-size: 24px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .stage-indicator {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .quiz-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .score {
+            color: #4ecdc4;
+        }
+
+        .question-counter {
+            color: #667eea;
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 18px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .question-image {
+            width: 120px;
+            height: 120px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            border: 3px solid #e9ecef;
+            overflow: hidden;
+        }
+
+        .question-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .question-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 25px;
+        }
+
+        .fruit-name-display {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-radius: 15px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .audio-button {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            font-size: 32px;
+            cursor: pointer;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .audio-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 3px solid #e9ecef;
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .option-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .option-btn.correct {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+            border-color: #4ecdc4;
+        }
+
+        .option-btn.wrong {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            border-color: #ff6b6b;
+        }
+
+        .option-btn.disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .image-option {
+            width: 80px;
+            height: 80px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            border: 3px solid #e9ecef;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .image-option img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 9px;
+        }
+
+        .image-option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .image-option.correct {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            border-color: #4ecdc4;
+        }
+
+        .image-option.wrong {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            border-color: #ff6b6b;
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .next-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .next-btn.show {
+            display: block;
+        }
+
+        .stage-complete {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .stage-complete.show {
+            display: block;
+        }
+
+        .stage-complete h2 {
+            color: #4ecdc4;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .stage-score {
+            font-size: 36px;
+            font-weight: 700;
+            color: #667eea;
+            margin: 20px 0;
+        }
+
+        .continue-btn {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 10px;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .final-result {
+            display: none;
+            text-align: center;
+        }
+
+        .final-result.show {
+            display: block;
+        }
+
+        .final-score {
+            font-size: 48px;
+            font-weight: 700;
+            margin: 20px 0;
+        }
+
+        .excellent { color: #4ecdc4; }
+        .good { color: #feca57; }
+        .needs-practice { color: #ff6b6b; }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 10px;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #45b7d1);
+            width: 0%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .feedback {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 12px;
+            font-weight: 600;
+            text-align: center;
+            display: none;
+        }
+
+        .feedback.correct {
+            background: linear-gradient(135deg, rgba(78, 205, 196, 0.1), rgba(68, 160, 141, 0.1));
+            color: #4ecdc4;
+            border: 2px solid rgba(78, 205, 196, 0.3);
+            display: block;
+        }
+
+        .feedback.wrong {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(238, 90, 82, 0.1));
+            color: #ff6b6b;
+            border: 2px solid rgba(255, 107, 107, 0.3);
+            display: block;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 60%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            80% { transform: translateY(-5px); }
+        }
+
+        .bounce {
+            animation: bounce 0.6s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 0.8s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- زر الصفحة الرئيسية -->
+        <button class="home-btn" onclick="goBack()" title="العودة للصفحة السابقة">🏠</button>
+
+        <!-- شاشة الكويز -->
+        <div id="quiz-screen">
+            <div class="header">
+                <h1 class="quiz-title">Quiz Fruits - 3 Niveaux</h1>
+                <div class="stage-indicator" id="stage-indicator">Niveau 1: Image → Mot</div>
+                <p class="subtitle" id="stage-description">Regardez l'image et choisissez le bon mot en français</p>
+            </div>
+
+            <div class="quiz-info">
+                <div class="score">Score: <span id="score">0</span>/<span id="total-questions">8</span></div>
+                <div class="question-counter">Question <span id="current-q">1</span>/<span id="stage-total">8</span></div>
+            </div>
+
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill"></div>
+            </div>
+
+            <div class="question-card">
+                <!-- المرحلة الأولى: صورة → كلمة -->
+                <div id="stage1-content">
+                    <div class="question-image" id="question-image"></div>
+                    <div class="question-text">Comment dit-on ceci en français ?</div>
+                </div>
+
+                <!-- المرحلة الثانية: كلمة → صورة -->
+                <div id="stage2-content" style="display: none;">
+                    <div class="fruit-name-display" id="fruit-name">Pomme</div>
+                    <div class="question-text">Choisissez l'image qui correspond à ce mot</div>
+                </div>
+
+                <!-- المرحلة الثالثة: صوت → صورة -->
+                <div id="stage3-content" style="display: none;">
+                    <button class="audio-button" id="audio-btn" onclick="playCurrentAudio()">🔊</button>
+                    <div class="question-text">Écoutez et choisissez l'image qui correspond au son</div>
+                </div>
+                
+                <div class="options-grid" id="options-container">
+                    <!-- الخيارات ستُملأ بواسطة JavaScript -->
+                </div>
+
+                <div id="feedback" class="feedback"></div>
+                
+                <button class="next-btn" id="next-btn" onclick="nextQuestion()">Question Suivante</button>
+            </div>
+        </div>
+
+        <!-- شاشة إكمال المرحلة -->
+        <div id="stage-complete" class="stage-complete">
+            <h2 id="stage-complete-title">Niveau 1 Terminé!</h2>
+            <div class="stage-score" id="stage-score">8/8</div>
+            <div id="stage-message">Excellent! Passons au niveau suivant</div>
+            <div style="margin-top: 30px;">
+                <button class="continue-btn" onclick="nextStage()">Continuer au Niveau Suivant 🎯</button>
+            </div>
+        </div>
+
+        <!-- شاشة النتائج النهائية -->
+        <div id="final-result" class="final-result">
+            <h2>Quiz Complet!</h2>
+            <div class="final-score" id="final-score">24/24</div>
+            <div id="final-message">Félicitations! Vous maîtrisez les fruits en français!</div>
+            <div style="margin-top: 30px;">
+                <button class="restart-btn" onclick="restartQuiz()">🔄 Recommencer</button>
+                <button class="home-btn" onclick="goBack()" style="position: static; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 15px 30px; border-radius: 25px; cursor: pointer; font-size: 16px; font-weight: 600; margin: 10px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); transition: all 0.3s ease; width: auto; height: auto;">🏠 Accueil</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // بيانات الفواكه مع أسماء الصور المحلية
+        const fruitsData = [
+            { name: "fruit", image: "pomme.jpg", french: "pomme", audio: "pomme" },
+            { name: "fruit", image: "banane.jpg", french: "Banane", audio: "banane" },
+            { name: "orange", image: "orange.jpg", french: "Orange", audio: "orange" },
+            { name: "fraise", image: "fraise.jpg", french: "Fraise", audio: "fraise" },
+            { name: "raisin", image: "raisin.jpg", french: "Raisin", audio: "raisin" },
+            { name: "peche", image: "peche.jpg", french: "Pêche", audio: "pêche" },
+            { name: "ananas", image: "ananas.jpg", french: "Ananas", audio: "ananas" },
+            { name: "pasteque", image: "pasteque.jpg", french: "Pastèque", audio: "pastèque" },
+            { name: "melon", image: "melon.jpg", french: "melon", audio: "melon" },
+            { name: "Abricot", image: "Abricot.jpg", french: "Abricot", audio: "Abricot" },
+            { name: "kiwi", image: "kiwi.jpg", french: "kiwi", audio: "kiwi" },
+            { name: "poire", image: "poire.jpg", french: "poire", audio: "poire" },
+            { name: "avocat", image: "avocat.jpg", french: "avocat", audio: "avocat" },
+            { name: "framboise", image: "framboise.jpg", french: "framboise", audio: "framboise" },
+            { name: "cerise", image: "cerise.jpg", french: "cerise", audio: "cerise" },
+            { name: "kaki", image: "kaki.jpg", french: "kaki", audio: "kaki" },
+            { name: "figue", image: "figue.jpg", french: "figue", audio: "figue" },
+            { name: "Citron", image: "Citron.jpg", french: "Citron", audio: "Citron" },
+            { name: "Clémentine", image: "Clémentine.jpg", french: "Clémentine", audio: "Clémentine" },
+            { name: "Fruit du dragon", image: "Fruit du dragon.jpg", french: "Fruit du dragon", audio: "Fruit du dragon" },
+            { name: "mangue", image: "mangue.jpg", french: "mangue", audio: "mangue" },
+            { name: "grenade", image: "grenade.jpg", french: "grenade", audio: "grenade" },
+            { name: "mûre", image: "mûre.jpg", french: "mûre", audio: "mûre" },
+            { name: "pamplemousse", image: "pamplemousse.jpg", french: "pamplemousse", audio: "pamplemousse" },
+            { name: "papaye", image: "papaye.jpg", french: "papaye", audio: "papaye" },
+            { name: "prune", image: "prune.jpg", french: "prune", audio: "prune" },
+            { name: "myrtille", image: "myrtille.jpg", french: "myrtille", audio: "myrtille" },
+            { name: "Noix de coco", image: "Noix de coco.jpg", french: "Noix de coco", audio: "Noix de coco" }
+        ];
+
+        // متغيرات عامة
+        let currentStage = 1;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let totalScore = 0;
+        let questions = [];
+        let hasAnswered = false;
+        let stageScores = [0, 0, 0];
+
+        const stageInfo = {
+            1: {
+                title: "Niveau 1: Image → Mot",
+                description: "Regardez l'image et choisissez le bon mot en français"
+            },
+            2: {
+                title: "Niveau 2: Mot → Image", 
+                description: "Lisez le mot et choisissez la bonne image"
+            },
+            3: {
+                title: "Niveau 3: Son → Image",
+                description: "Écoutez et choisissez l'image qui correspond au son"
+            }
+        };
+
+        // وظيفة العودة للصفحة السابقة
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                // في حالة عدم وجود صفحة سابقة، يمكن إغلاق النافذة أو التوجه لصفحة افتراضية
+                window.close();
+            }
+        }
+
+        // إعداد الكويز
+        function setupQuiz() {
+            currentStage = 1;
+            currentQuestionIndex = 0;
+            score = 0;
+            totalScore = 0;
+            stageScores = [0, 0, 0];
+            hasAnswered = false;
+            
+            setupStage();
+        }
+
+        // إعداد المرحلة الحالية
+        function setupStage() {
+            questions = [...fruitsData];
+            shuffleArray(questions);
+            currentQuestionIndex = 0;
+            score = 0;
+            hasAnswered = false;
+            
+            updateStageUI();
+            
+            document.getElementById('quiz-screen').style.display = 'block';
+            document.getElementById('stage-complete').classList.remove('show');
+            document.getElementById('final-result').classList.remove('show');
+            
+            showQuestion();
+        }
+
+        // تحديث واجهة المرحلة
+        function updateStageUI() {
+            document.getElementById('stage-indicator').textContent = stageInfo[currentStage].title;
+            document.getElementById('stage-description').textContent = stageInfo[currentStage].description;
+            document.getElementById('total-questions').textContent = fruitsData.length * 3;
+            document.getElementById('stage-total').textContent = fruitsData.length;
+            
+            document.getElementById('stage1-content').style.display = 'none';
+            document.getElementById('stage2-content').style.display = 'none';
+            document.getElementById('stage3-content').style.display = 'none';
+            
+            document.getElementById(`stage${currentStage}-content`).style.display = 'block';
+        }
+
+        // خلط المصفوفة
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // عرض السؤال الحالي
+        function showQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                showStageComplete();
+                return;
+            }
+
+            const currentQuestion = questions[currentQuestionIndex];
+            hasAnswered = false;
+            
+            document.getElementById('current-q').textContent = currentQuestionIndex + 1;
+            updateTotalScore();
+            
+            const totalQuestions = fruitsData.length * 3;
+            const completedQuestions = (currentStage - 1) * fruitsData.length + currentQuestionIndex;
+            const progress = (completedQuestions / totalQuestions) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+            
+            if (currentStage === 1) {
+                showStage1Question(currentQuestion);
+            } else if (currentStage === 2) {
+                showStage2Question(currentQuestion);
+            } else if (currentStage === 3) {
+                showStage3Question(currentQuestion);
+            }
+            
+            document.getElementById('next-btn').classList.remove('show');
+            document.getElementById('feedback').style.display = 'none';
+        }
+
+        // المرحلة الأولى: صورة → كلمة
+        function showStage1Question(currentQuestion) {
+            const imageElement = document.getElementById('question-image');
+            imageElement.innerHTML = `<img src="${currentQuestion.image}" alt="${currentQuestion.french}" onerror="this.style.display='none'; this.parentElement.innerHTML='🍎';">`;
+            
+            createTextOptions(currentQuestion);
+        }
+
+        // المرحلة الثانية: كلمة → صورة
+        function showStage2Question(currentQuestion) {
+            document.getElementById('fruit-name').textContent = currentQuestion.french;
+            
+            createImageOptions(currentQuestion);
+        }
+
+        // المرحلة الثالثة: صوت → صورة
+        function showStage3Question(currentQuestion) {
+            window.currentAudioQuestion = currentQuestion;
+            
+            setTimeout(() => {
+                playCurrentAudio();
+            }, 500);
+            
+            createImageOptions(currentQuestion);
+        }
+
+        // تشغيل الصوت للمرحلة الثالثة
+        function playCurrentAudio() {
+            if (window.currentAudioQuestion && 'speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(window.currentAudioQuestion.audio);
+                utterance.lang = 'fr-FR';
+                utterance.rate = 0.8;
+                utterance.pitch = 1;
+                speechSynthesis.speak(utterance);
+                
+                document.getElementById('audio-btn').classList.add('pulse');
+                setTimeout(() => {
+                    document.getElementById('audio-btn').classList.remove('pulse');
+                }, 800);
+            }
+        }
+
+        // إنشاء خيارات نصية (المرحلة الأولى)
+        function createTextOptions(correctAnswer) {
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            let wrongOptions = fruitsData.filter(fruit => fruit.name !== correctAnswer.name);
+            shuffleArray(wrongOptions);
+            wrongOptions = wrongOptions.slice(0, 3);
+            
+            let allOptions = [correctAnswer, ...wrongOptions];
+            shuffleArray(allOptions);
+            
+            allOptions.forEach((option, index) => {
+                const optionBtn = document.createElement('button');
+                optionBtn.className = 'option-btn';
+                optionBtn.textContent = option.french;
+                optionBtn.onclick = () => selectOption(optionBtn, option.name === correctAnswer.name, correctAnswer.french, correctAnswer.audio);
+                optionsContainer.appendChild(optionBtn);
+            });
+        }
+
+        // إنشاء خيارات صور (المرحلة الثانية والثالثة)
+        function createImageOptions(correctAnswer) {
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            let wrongOptions = fruitsData.filter(fruit => fruit.name !== correctAnswer.name);
+            shuffleArray(wrongOptions);
+            wrongOptions = wrongOptions.slice(0, 3);
+            
+            let allOptions = [correctAnswer, ...wrongOptions];
+            shuffleArray(allOptions);
+            
+            allOptions.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option-btn';
+                optionDiv.style.padding = '10px';
+                
+                const imageDiv = document.createElement('div');
+                imageDiv.className = 'image-option';
+                imageDiv.innerHTML = `<img src="${option.image}" alt="${option.french}" onerror="this.style.display='none'; this.parentElement.innerHTML='🍎';">`;
+                imageDiv.onclick = () => selectImageOption(imageDiv, option.name === correctAnswer.name, correctAnswer.french, correctAnswer.audio);
+                
+                optionDiv.appendChild(imageDiv);
+                optionsContainer.appendChild(optionDiv);
+            });
+        }
+
+        // اختيار خيار نصي
+        function selectOption(button, isCorrect, correctAnswer, correctAudio) {
+            if (hasAnswered) return;
+            
+            hasAnswered = true;
+            const allOptions = document.querySelectorAll('.option-btn');
+            
+            allOptions.forEach(btn => btn.classList.add('disabled'));
+            
+            if (isCorrect) {
+                button.classList.add('correct');
+                score++;
+                showFeedback(true, `Correct! C'est bien "${correctAnswer}"`);
+                button.classList.add('bounce');
+                playSuccessSound(correctAudio);
+            } else {
+                button.classList.add('wrong');
+                allOptions.forEach(btn => {
+                    if (btn.textContent === correctAnswer) {
+                        btn.classList.add('correct');
+                    }
+                });
+                showFeedback(false, `Incorrect! La bonne réponse est "${correctAnswer}"`);
+                playErrorSound(correctAudio);
+            }
+            
+            setTimeout(() => {
+                document.getElementById('next-btn').classList.add('show');
+            }, 1000);
+            
+            updateTotalScore();
+        }
+
+        // اختيار خيار صورة
+        function selectImageOption(imageElement, isCorrect, correctAnswer, correctAudio) {
+            if (hasAnswered) return;
+            
+            hasAnswered = true;
+            const allImages = document.querySelectorAll('.image-option');
+            
+            allImages.forEach(img => {
+                img.style.pointerEvents = 'none';
+                img.style.opacity = '0.7';
+            });
+            
+            if (isCorrect) {
+                imageElement.classList.add('correct');
+                score++;
+                showFeedback(true, `Correct! C'est bien "${correctAnswer}"`);
+                imageElement.classList.add('bounce');
+                playSuccessSound(correctAudio);
+            } else {
+                imageElement.classList.add('wrong');
+                allImages.forEach(img => {
+                    const imgSrc = img.querySelector('img')?.src;
+                    if (imgSrc && imgSrc.includes(questions[currentQuestionIndex].image)) {
+                        img.classList.add('correct');
+                    }
+                });
+                showFeedback(false, `Incorrect! La bonne réponse est "${correctAnswer}"`);
+                playErrorSound(correctAudio);
+            }
+            
+            setTimeout(() => {
+                document.getElementById('next-btn').classList.add('show');
+            }, 1000);
+            
+            updateTotalScore();
+        }
+
+        // تحديث النتيجة الإجمالية
+        function updateTotalScore() {
+            totalScore = stageScores[0] + stageScores[1] + score;
+            document.getElementById('score').textContent = totalScore;
+        }
+
+        // عرض التعليق
+        function showFeedback(isCorrect, message) {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = message;
+            feedback.className = `feedback ${isCorrect ? 'correct' : 'wrong'}`;
+        }
+
+        // الانتقال للسؤال التالي
+        function nextQuestion() {
+            currentQuestionIndex++;
+            showQuestion();
+        }
+
+        // عرض إكمال المرحلة
+        function showStageComplete() {
+            stageScores[currentStage - 1] = score;
+            
+            document.getElementById('quiz-screen').style.display = 'none';
+            document.getElementById('stage-complete').classList.add('show');
+            
+            document.getElementById('stage-complete-title').textContent = `Niveau ${currentStage} Terminé!`;
+            document.getElementById('stage-score').textContent = `${score}/${questions.length}`;
+            
+            const percentage = (score / questions.length) * 100;
+            let message = '';
+            
+            if (percentage >= 80) {
+                message = 'Excellent! Passons au niveau suivant 🌟';
+            } else if (percentage >= 60) {
+                message = 'Bon travail! Continuons 👍';
+            } else {
+                message = 'Bien essayé! Le niveau suivant vous aidera 💪';
+            }
+            
+            if (currentStage === 3) {
+                message = 'Félicitations! Vous avez terminé tous les niveaux!';
+                document.querySelector('.continue-btn').textContent = 'Voir les Résultats Finaux 🏆';
+            }
+            
+            document.getElementById('stage-message').textContent = message;
+        }
+
+        // الانتقال للمرحلة التالية
+        function nextStage() {
+            if (currentStage < 3) {
+                currentStage++;
+                setupStage();
+            } else {
+                showFinalResults();
+            }
+        }
+
+        // عرض النتائج النهائية
+        function showFinalResults() {
+            document.getElementById('stage-complete').classList.remove('show');
+            document.getElementById('final-result').classList.add('show');
+            
+            const totalQuestions = fruitsData.length * 3;
+            const finalScore = stageScores[0] + stageScores[1] + stageScores[2];
+            
+            document.getElementById('final-score').textContent = `${finalScore}/${totalQuestions}`;
+            
+            const percentage = (finalScore / totalQuestions) * 100;
+            const finalScoreElement = document.getElementById('final-score');
+            const finalMessageElement = document.getElementById('final-message');
+            
+            if (percentage >= 85) {
+                finalScoreElement.className = 'final-score excellent';
+                finalMessageElement.textContent = 'Parfait! Vous maîtrisez parfaitement les fruits en français! 🌟🎉';
+            } else if (percentage >= 70) {
+                finalScoreElement.className = 'final-score good';
+                finalMessageElement.textContent = 'Très bien! Vous avez un excellent niveau! 👏🎯';
+            } else if (percentage >= 50) {
+                finalScoreElement.className = 'final-score good';
+                finalMessageElement.textContent = 'Bien joué! Vous progressez très bien! 👍📚';
+            } else {
+                finalScoreElement.className = 'final-score needs-practice';
+                finalMessageElement.textContent = 'Continuez à pratiquer, vous allez y arriver! 💪🔥';
+            }
+            
+            document.getElementById('progress-fill').style.width = '100%';
+        }
+
+        // إعادة تشغيل الكويز
+        function restartQuiz() {
+            setupQuiz();
+        }
+
+        // تشغيل صوت النجاح - الآن يشغل اسم الفاكهة
+        function playSuccessSound(fruitAudio) {
+            if ('speechSynthesis' in window && fruitAudio) {
+                // تشغيل اسم الفاكهة مباشرة
+                const utterance = new SpeechSynthesisUtterance(fruitAudio);
+                utterance.lang = 'fr-FR';
+                utterance.rate = 0.8;
+                utterance.pitch = 1.1;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        // تشغيل صوت الخطأ - الآن يشغل موسيقى الفشل ثم اسم الفاكهة
+        function playErrorSound(fruitAudio) {
+            if ('speechSynthesis' in window) {
+                // تشغيل صوت للفشل أولاً (نغمة منخفضة)
+                const failSound = new SpeechSynthesisUtterance('Oh non!');
+                failSound.lang = 'fr-FR';
+                failSound.rate = 0.6;
+                failSound.pitch = 0.6;
+                
+                // عند انتهاء صوت الفشل، تشغيل اسم الفاكهة للتصحيح
+                failSound.onend = function() {
+                    if (fruitAudio) {
+                        setTimeout(() => {
+                            const correctSound = new SpeechSynthesisUtterance(fruitAudio);
+                            correctSound.lang = 'fr-FR';
+                            correctSound.rate = 0.8;
+                            correctSound.pitch = 1;
+                            speechSynthesis.speak(correctSound);
+                        }, 300); // تأخير قصير قبل تشغيل الإجابة الصحيحة
+                    }
+                };
+                
+                speechSynthesis.speak(failSound);
+            }
+        }
+
+        // بدء الكويز عند تحميل الصفحة
+        window.onload = function() {
+            setupQuiz();
+        };
+    </script>
+</body>
+</html>
