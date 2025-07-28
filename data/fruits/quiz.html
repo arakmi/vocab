@@ -102,25 +102,6 @@
             margin-bottom: 20px;
         }
 
-        .quiz-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .score {
-            color: #4ecdc4;
-        }
-
-        .question-counter {
-            color: #667eea;
-        }
-
         .question-card {
             background: white;
             border-radius: 18px;
@@ -310,13 +291,6 @@
             font-size: 24px;
         }
 
-        .stage-score {
-            font-size: 36px;
-            font-weight: 700;
-            color: #667eea;
-            margin: 20px 0;
-        }
-
         .continue-btn {
             background: linear-gradient(135deg, #4ecdc4, #44a08d);
             color: white;
@@ -340,16 +314,6 @@
             display: block;
         }
 
-        .final-score {
-            font-size: 48px;
-            font-weight: 700;
-            margin: 20px 0;
-        }
-
-        .excellent { color: #4ecdc4; }
-        .good { color: #feca57; }
-        .needs-practice { color: #ff6b6b; }
-
         .restart-btn {
             background: linear-gradient(135deg, #4ecdc4, #44a08d);
             color: white;
@@ -362,23 +326,6 @@
             margin: 10px;
             box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
             transition: all 0.3s ease;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: #e9ecef;
-            border-radius: 3px;
-            margin: 20px 0;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #4ecdc4, #45b7d1);
-            width: 0%;
-            border-radius: 3px;
-            transition: width 0.5s ease;
         }
 
         .feedback {
@@ -423,6 +370,11 @@
         .pulse {
             animation: pulse 0.8s ease-in-out;
         }
+
+        /* إخفاء ملفات الصوت */
+        .audio-element {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -436,15 +388,6 @@
                 <h1 class="quiz-title">Quiz Fruits - 3 Niveaux</h1>
                 <div class="stage-indicator" id="stage-indicator">Niveau 1: Image → Mot</div>
                 <p class="subtitle" id="stage-description">Regardez l'image et choisissez le bon mot en français</p>
-            </div>
-
-            <div class="quiz-info">
-                <div class="score">Score: <span id="score">0</span>/<span id="total-questions">8</span></div>
-                <div class="question-counter">Question <span id="current-q">1</span>/<span id="stage-total">8</span></div>
-            </div>
-
-            <div class="progress-bar">
-                <div id="progress-fill" class="progress-fill"></div>
             </div>
 
             <div class="question-card">
@@ -479,7 +422,6 @@
         <!-- شاشة إكمال المرحلة -->
         <div id="stage-complete" class="stage-complete">
             <h2 id="stage-complete-title">Niveau 1 Terminé!</h2>
-            <div class="stage-score" id="stage-score">8/8</div>
             <div id="stage-message">Excellent! Passons au niveau suivant</div>
             <div style="margin-top: 30px;">
                 <button class="continue-btn" onclick="nextStage()">Continuer au Niveau Suivant 🎯</button>
@@ -489,8 +431,7 @@
         <!-- شاشة النتائج النهائية -->
         <div id="final-result" class="final-result">
             <h2>Quiz Complet!</h2>
-            <div class="final-score" id="final-score">24/24</div>
-            <div id="final-message">Félicitations! Vous maîtrisez les fruits en français!</div>
+            <div id="final-message">Félicitations! Vous avez terminé tous les niveaux!</div>
             <div style="margin-top: 30px;">
                 <button class="restart-btn" onclick="restartQuiz()">🔄 Recommencer</button>
                 <button class="home-btn" onclick="goBack()" style="position: static; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 15px 30px; border-radius: 25px; cursor: pointer; font-size: 16px; font-weight: 600; margin: 10px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); transition: all 0.3s ease; width: auto; height: auto;">🏠 Accueil</button>
@@ -498,47 +439,48 @@
         </div>
     </div>
 
+    <!-- عناصر الصوت المخفية -->
+    <div id="audio-container" class="audio-element"></div>
+
     <script>
         // بيانات الفواكه مع أسماء الصور المحلية
         const fruitsData = [
-            { name: "fruit", image: "pomme.jpg", french: "pomme", audio: "pomme" },
-            { name: "fruit", image: "banane.jpg", french: "Banane", audio: "banane" },
-            { name: "orange", image: "orange.jpg", french: "Orange", audio: "orange" },
-            { name: "fraise", image: "fraise.jpg", french: "Fraise", audio: "fraise" },
-            { name: "raisin", image: "raisin.jpg", french: "Raisin", audio: "raisin" },
-            { name: "peche", image: "peche.jpg", french: "Pêche", audio: "pêche" },
-            { name: "ananas", image: "ananas.jpg", french: "Ananas", audio: "ananas" },
-            { name: "pasteque", image: "pasteque.jpg", french: "Pastèque", audio: "pastèque" },
-            { name: "melon", image: "melon.jpg", french: "melon", audio: "melon" },
-            { name: "Abricot", image: "Abricot.jpg", french: "Abricot", audio: "Abricot" },
-            { name: "kiwi", image: "kiwi.jpg", french: "kiwi", audio: "kiwi" },
-            { name: "poire", image: "poire.jpg", french: "poire", audio: "poire" },
-            { name: "avocat", image: "avocat.jpg", french: "avocat", audio: "avocat" },
-            { name: "framboise", image: "framboise.jpg", french: "framboise", audio: "framboise" },
-            { name: "cerise", image: "cerise.jpg", french: "cerise", audio: "cerise" },
-            { name: "kaki", image: "kaki.jpg", french: "kaki", audio: "kaki" },
-            { name: "figue", image: "figue.jpg", french: "figue", audio: "figue" },
-            { name: "Citron", image: "Citron.jpg", french: "Citron", audio: "Citron" },
-            { name: "Clémentine", image: "Clémentine.jpg", french: "Clémentine", audio: "Clémentine" },
-            { name: "Fruit du dragon", image: "Fruit du dragon.jpg", french: "Fruit du dragon", audio: "Fruit du dragon" },
-            { name: "mangue", image: "mangue.jpg", french: "mangue", audio: "mangue" },
-            { name: "grenade", image: "grenade.jpg", french: "grenade", audio: "grenade" },
-            { name: "mûre", image: "mûre.jpg", french: "mûre", audio: "mûre" },
-            { name: "pamplemousse", image: "pamplemousse.jpg", french: "pamplemousse", audio: "pamplemousse" },
-            { name: "papaye", image: "papaye.jpg", french: "papaye", audio: "papaye" },
-            { name: "prune", image: "prune.jpg", french: "prune", audio: "prune" },
-            { name: "myrtille", image: "myrtille.jpg", french: "myrtille", audio: "myrtille" },
-            { name: "Noix de coco", image: "Noix de coco.jpg", french: "Noix de coco", audio: "Noix de coco" }
+            { name: "pomme", image: "pomme.jpg", french: "Pomme", audio: "pomme.mp3" },
+            { name: "banane", image: "banane.jpg", french: "Banane", audio: "banane.mp3" },
+            { name: "orange", image: "orange.jpg", french: "Orange", audio: "orange.mp3" },
+            { name: "fraise", image: "fraise.jpg", french: "Fraise", audio: "fraise.mp3" },
+            { name: "raisin", image: "raisin.jpg", french: "Raisin", audio: "raisin.mp3" },
+            { name: "peche", image: "peche.jpg", french: "Pêche", audio: "peche.mp3" },
+            { name: "ananas", image: "ananas.jpg", french: "Ananas", audio: "ananas.mp3" },
+            { name: "pasteque", image: "pasteque.jpg", french: "Pastèque", audio: "pasteque.mp3" },
+            { name: "melon", image: "melon.jpg", french: "Melon", audio: "melon.mp3" },
+            { name: "abricot", image: "abricot.jpg", french: "Abricot", audio: "abricot.mp3" },
+            { name: "kiwi", image: "kiwi.jpg", french: "Kiwi", audio: "kiwi.mp3" },
+            { name: "poire", image: "poire.jpg", french: "Poire", audio: "poire.mp3" },
+            { name: "avocat", image: "avocat.jpg", french: "Avocat", audio: "avocat.mp3" },
+            { name: "framboise", image: "framboise.jpg", french: "Framboise", audio: "framboise.mp3" },
+            { name: "cerise", image: "cerise.jpg", french: "Cerise", audio: "cerise.mp3" },
+            { name: "kaki", image: "kaki.jpg", french: "Kaki", audio: "kaki.mp3" },
+            { name: "figue", image: "figue.jpg", french: "Figue", audio: "figue.mp3" },
+            { name: "citron", image: "citron.jpg", french: "Citron", audio: "citron.mp3" },
+            { name: "clementine", image: "clementine.jpg", french: "Clémentine", audio: "clementine.mp3" },
+            { name: "fruit_du_dragon", image: "fruit_du_dragon.jpg", french: "Fruit du dragon", audio: "fruit_du_dragon.mp3" },
+            { name: "mangue", image: "mangue.jpg", french: "Mangue", audio: "mangue.mp3" },
+            { name: "grenade", image: "grenade.jpg", french: "Grenade", audio: "grenade.mp3" },
+            { name: "mure", image: "mure.jpg", french: "Mûre", audio: "mure.mp3" },
+            { name: "pamplemousse", image: "pamplemousse.jpg", french: "Pamplemousse", audio: "pamplemousse.mp3" },
+            { name: "papaye", image: "papaye.jpg", french: "Papaye", audio: "papaye.mp3" },
+            { name: "prune", image: "prune.jpg", french: "Prune", audio: "prune.mp3" },
+            { name: "myrtille", image: "myrtille.jpg", french: "Myrtille", audio: "myrtille.mp3" },
+            { name: "noix_de_coco", image: "noix_de_coco.jpg", french: "Noix de coco", audio: "noix_de_coco.mp3" }
         ];
 
         // متغيرات عامة
         let currentStage = 1;
         let currentQuestionIndex = 0;
-        let score = 0;
-        let totalScore = 0;
         let questions = [];
         let hasAnswered = false;
-        let stageScores = [0, 0, 0];
+        let currentAudioElement = null;
 
         const stageInfo = {
             1: {
@@ -560,7 +502,6 @@
             if (window.history.length > 1) {
                 window.history.back();
             } else {
-                // في حالة عدم وجود صفحة سابقة، يمكن إغلاق النافذة أو التوجه لصفحة افتراضية
                 window.close();
             }
         }
@@ -569,9 +510,6 @@
         function setupQuiz() {
             currentStage = 1;
             currentQuestionIndex = 0;
-            score = 0;
-            totalScore = 0;
-            stageScores = [0, 0, 0];
             hasAnswered = false;
             
             setupStage();
@@ -582,7 +520,6 @@
             questions = [...fruitsData];
             shuffleArray(questions);
             currentQuestionIndex = 0;
-            score = 0;
             hasAnswered = false;
             
             updateStageUI();
@@ -598,8 +535,6 @@
         function updateStageUI() {
             document.getElementById('stage-indicator').textContent = stageInfo[currentStage].title;
             document.getElementById('stage-description').textContent = stageInfo[currentStage].description;
-            document.getElementById('total-questions').textContent = fruitsData.length * 3;
-            document.getElementById('stage-total').textContent = fruitsData.length;
             
             document.getElementById('stage1-content').style.display = 'none';
             document.getElementById('stage2-content').style.display = 'none';
@@ -625,14 +560,6 @@
 
             const currentQuestion = questions[currentQuestionIndex];
             hasAnswered = false;
-            
-            document.getElementById('current-q').textContent = currentQuestionIndex + 1;
-            updateTotalScore();
-            
-            const totalQuestions = fruitsData.length * 3;
-            const completedQuestions = (currentStage - 1) * fruitsData.length + currentQuestionIndex;
-            const progress = (completedQuestions / totalQuestions) * 100;
-            document.getElementById('progress-fill').style.width = progress + '%';
             
             if (currentStage === 1) {
                 showStage1Question(currentQuestion);
@@ -672,19 +599,58 @@
             createImageOptions(currentQuestion);
         }
 
-        // تشغيل الصوت للمرحلة الثالثة
+        // تشغيل الصوت للمرحلة الثالثة مع دعم الهاتف
         function playCurrentAudio() {
-            if (window.currentAudioQuestion && 'speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(window.currentAudioQuestion.audio);
+            if (window.currentAudioQuestion) {
+                try {
+                    // إيقاف أي صوت سابق
+                    if (currentAudioElement) {
+                        currentAudioElement.pause();
+                        currentAudioElement = null;
+                    }
+
+                    // إنشاء عنصر صوت جديد
+                    currentAudioElement = new Audio();
+                    currentAudioElement.src = window.currentAudioQuestion.audio;
+                    
+                    // إضافة مستمعات للأحداث
+                    currentAudioElement.addEventListener('canplaythrough', function() {
+                        this.play().catch(e => {
+                            console.log('خطأ في تشغيل الصوت:', e);
+                            // في حالة فشل الصوت، استخدم Speech Synthesis كبديل
+                            fallbackToSpeechSynthesis(window.currentAudioQuestion.french);
+                        });
+                    });
+
+                    currentAudioElement.addEventListener('error', function() {
+                        console.log('فشل في تحميل ملف الصوت، استخدام Speech Synthesis');
+                        fallbackToSpeechSynthesis(window.currentAudioQuestion.french);
+                    });
+
+                    // تحميل الملف
+                    currentAudioElement.load();
+                    
+                    // إضافة تأثير بصري
+                    document.getElementById('audio-btn').classList.add('pulse');
+                    setTimeout(() => {
+                        document.getElementById('audio-btn').classList.remove('pulse');
+                    }, 800);
+
+                } catch (error) {
+                    console.log('خطأ في إنشاء عنصر الصوت:', error);
+                    fallbackToSpeechSynthesis(window.currentAudioQuestion.french);
+                }
+            }
+        }
+
+        // وظيفة بديلة لـ Speech Synthesis
+        function fallbackToSpeechSynthesis(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'fr-FR';
                 utterance.rate = 0.8;
                 utterance.pitch = 1;
                 speechSynthesis.speak(utterance);
-                
-                document.getElementById('audio-btn').classList.add('pulse');
-                setTimeout(() => {
-                    document.getElementById('audio-btn').classList.remove('pulse');
-                }, 800);
             }
         }
 
@@ -704,7 +670,7 @@
                 const optionBtn = document.createElement('button');
                 optionBtn.className = 'option-btn';
                 optionBtn.textContent = option.french;
-                optionBtn.onclick = () => selectOption(optionBtn, option.name === correctAnswer.name, correctAnswer.french, correctAnswer.audio);
+                optionBtn.onclick = () => selectOption(optionBtn, option.name === correctAnswer.name, correctAnswer);
                 optionsContainer.appendChild(optionBtn);
             });
         }
@@ -729,7 +695,7 @@
                 const imageDiv = document.createElement('div');
                 imageDiv.className = 'image-option';
                 imageDiv.innerHTML = `<img src="${option.image}" alt="${option.french}" onerror="this.style.display='none'; this.parentElement.innerHTML='🍎';">`;
-                imageDiv.onclick = () => selectImageOption(imageDiv, option.name === correctAnswer.name, correctAnswer.french, correctAnswer.audio);
+                imageDiv.onclick = () => selectImageOption(imageDiv, option.name === correctAnswer.name, correctAnswer);
                 
                 optionDiv.appendChild(imageDiv);
                 optionsContainer.appendChild(optionDiv);
@@ -737,7 +703,7 @@
         }
 
         // اختيار خيار نصي
-        function selectOption(button, isCorrect, correctAnswer, correctAudio) {
+        function selectOption(button, isCorrect, correctAnswer) {
             if (hasAnswered) return;
             
             hasAnswered = true;
@@ -747,30 +713,27 @@
             
             if (isCorrect) {
                 button.classList.add('correct');
-                score++;
-                showFeedback(true, `Correct! C'est bien "${correctAnswer}"`);
+                showFeedback(true, `Correct! C'est bien "${correctAnswer.french}"`);
                 button.classList.add('bounce');
-                playSuccessSound(correctAudio);
+                playSuccessSound(correctAnswer);
             } else {
                 button.classList.add('wrong');
                 allOptions.forEach(btn => {
-                    if (btn.textContent === correctAnswer) {
+                    if (btn.textContent === correctAnswer.french) {
                         btn.classList.add('correct');
                     }
                 });
-                showFeedback(false, `Incorrect! La bonne réponse est "${correctAnswer}"`);
-                playErrorSound(correctAudio);
+                showFeedback(false, `Incorrect! La bonne réponse est "${correctAnswer.french}"`);
+                playErrorSound(correctAnswer);
             }
             
             setTimeout(() => {
                 document.getElementById('next-btn').classList.add('show');
             }, 1000);
-            
-            updateTotalScore();
         }
 
         // اختيار خيار صورة
-        function selectImageOption(imageElement, isCorrect, correctAnswer, correctAudio) {
+        function selectImageOption(imageElement, isCorrect, correctAnswer) {
             if (hasAnswered) return;
             
             hasAnswered = true;
@@ -783,10 +746,9 @@
             
             if (isCorrect) {
                 imageElement.classList.add('correct');
-                score++;
-                showFeedback(true, `Correct! C'est bien "${correctAnswer}"`);
+                showFeedback(true, `Correct! C'est bien "${correctAnswer.french}"`);
                 imageElement.classList.add('bounce');
-                playSuccessSound(correctAudio);
+                playSuccessSound(correctAnswer);
             } else {
                 imageElement.classList.add('wrong');
                 allImages.forEach(img => {
@@ -795,21 +757,13 @@
                         img.classList.add('correct');
                     }
                 });
-                showFeedback(false, `Incorrect! La bonne réponse est "${correctAnswer}"`);
-                playErrorSound(correctAudio);
+                showFeedback(false, `Incorrect! La bonne réponse est "${correctAnswer.french}"`);
+                playErrorSound(correctAnswer);
             }
             
             setTimeout(() => {
                 document.getElementById('next-btn').classList.add('show');
             }, 1000);
-            
-            updateTotalScore();
-        }
-
-        // تحديث النتيجة الإجمالية
-        function updateTotalScore() {
-            totalScore = stageScores[0] + stageScores[1] + score;
-            document.getElementById('score').textContent = totalScore;
         }
 
         // عرض التعليق
@@ -827,20 +781,16 @@
 
         // عرض إكمال المرحلة
         function showStageComplete() {
-            stageScores[currentStage - 1] = score;
-            
             document.getElementById('quiz-screen').style.display = 'none';
             document.getElementById('stage-complete').classList.add('show');
             
             document.getElementById('stage-complete-title').textContent = `Niveau ${currentStage} Terminé!`;
-            document.getElementById('stage-score').textContent = `${score}/${questions.length}`;
             
-            const percentage = (score / questions.length) * 100;
             let message = '';
             
-            if (percentage >= 80) {
+            if (currentStage === 1) {
                 message = 'Excellent! Passons au niveau suivant 🌟';
-            } else if (percentage >= 60) {
+            } else if (currentStage === 2) {
                 message = 'Bon travail! Continuons 👍';
             } else {
                 message = 'Bien essayé! Le niveau suivant vous aidera 💪';
@@ -869,30 +819,7 @@
             document.getElementById('stage-complete').classList.remove('show');
             document.getElementById('final-result').classList.add('show');
             
-            const totalQuestions = fruitsData.length * 3;
-            const finalScore = stageScores[0] + stageScores[1] + stageScores[2];
-            
-            document.getElementById('final-score').textContent = `${finalScore}/${totalQuestions}`;
-            
-            const percentage = (finalScore / totalQuestions) * 100;
-            const finalScoreElement = document.getElementById('final-score');
-            const finalMessageElement = document.getElementById('final-message');
-            
-            if (percentage >= 85) {
-                finalScoreElement.className = 'final-score excellent';
-                finalMessageElement.textContent = 'Parfait! Vous maîtrisez parfaitement les fruits en français! 🌟🎉';
-            } else if (percentage >= 70) {
-                finalScoreElement.className = 'final-score good';
-                finalMessageElement.textContent = 'Très bien! Vous avez un excellent niveau! 👏🎯';
-            } else if (percentage >= 50) {
-                finalScoreElement.className = 'final-score good';
-                finalMessageElement.textContent = 'Bien joué! Vous progressez très bien! 👍📚';
-            } else {
-                finalScoreElement.className = 'final-score needs-practice';
-                finalMessageElement.textContent = 'Continuez à pratiquer, vous allez y arriver! 💪🔥';
-            }
-            
-            document.getElementById('progress-fill').style.width = '100%';
+            document.getElementById('final-message').textContent = 'Félicitations! Vous avez terminé tous les niveaux! 🌟🎉';
         }
 
         // إعادة تشغيل الكويز
@@ -900,22 +827,36 @@
             setupQuiz();
         }
 
-        // تشغيل صوت النجاح - الآن يشغل اسم الفاكهة
-        function playSuccessSound(fruitAudio) {
-            if ('speechSynthesis' in window && fruitAudio) {
-                // تشغيل اسم الفاكهة مباشرة
-                const utterance = new SpeechSynthesisUtterance(fruitAudio);
-                utterance.lang = 'fr-FR';
-                utterance.rate = 0.8;
-                utterance.pitch = 1.1;
-                speechSynthesis.speak(utterance);
+        // تشغيل صوت النجاح
+        function playSuccessSound(correctAnswer) {
+            try {
+                // محاولة تشغيل ملف الصوت أولاً
+                const successAudio = new Audio();
+                successAudio.src = correctAnswer.audio;
+                
+                successAudio.addEventListener('canplaythrough', function() {
+                    this.play().catch(e => {
+                        // في حالة فشل الصوت، استخدم Speech Synthesis
+                        fallbackToSpeechSynthesis(correctAnswer.french);
+                    });
+                });
+
+                successAudio.addEventListener('error', function() {
+                    // في حالة عدم وجود الملف، استخدم Speech Synthesis
+                    fallbackToSpeechSynthesis(correctAnswer.french);
+                });
+
+                successAudio.load();
+            } catch (error) {
+                // في حالة فشل إنشاء Audio، استخدم Speech Synthesis
+                fallbackToSpeechSynthesis(correctAnswer.french);
             }
         }
 
-        // تشغيل صوت الخطأ - الآن يشغل موسيقى الفشل ثم اسم الفاكهة
-        function playErrorSound(fruitAudio) {
+        // تشغيل صوت الخطأ
+        function playErrorSound(correctAnswer) {
             if ('speechSynthesis' in window) {
-                // تشغيل صوت للفشل أولاً (نغمة منخفضة)
+                // تشغيل صوت للفشل أولاً
                 const failSound = new SpeechSynthesisUtterance('Oh non!');
                 failSound.lang = 'fr-FR';
                 failSound.rate = 0.6;
@@ -923,18 +864,39 @@
                 
                 // عند انتهاء صوت الفشل، تشغيل اسم الفاكهة للتصحيح
                 failSound.onend = function() {
-                    if (fruitAudio) {
-                        setTimeout(() => {
-                            const correctSound = new SpeechSynthesisUtterance(fruitAudio);
-                            correctSound.lang = 'fr-FR';
-                            correctSound.rate = 0.8;
-                            correctSound.pitch = 1;
-                            speechSynthesis.speak(correctSound);
-                        }, 300); // تأخير قصير قبل تشغيل الإجابة الصحيحة
-                    }
+                    setTimeout(() => {
+                        try {
+                            // محاولة تشغيل ملف الصوت أولاً
+                            const correctAudio = new Audio();
+                            correctAudio.src = correctAnswer.audio;
+                            
+                            correctAudio.addEventListener('canplaythrough', function() {
+                                this.play().catch(e => {
+                                    fallbackToSpeechSynthesis(correctAnswer.french);
+                                });
+                            });
+
+                            correctAudio.addEventListener('error', function() {
+                                fallbackToSpeechSynthesis(correctAnswer.french);
+                            });
+
+                            correctAudio.load();
+                        } catch (error) {
+                            fallbackToSpeechSynthesis(correctAnswer.french);
+                        }
+                    }, 300);
                 };
                 
                 speechSynthesis.speak(failSound);
+            } else {
+                // إذا لم يكن Speech Synthesis متاحاً، حاول تشغيل الملف مباشرة
+                try {
+                    const correctAudio = new Audio();
+                    correctAudio.src = correctAnswer.audio;
+                    correctAudio.play().catch(e => console.log('فشل تشغيل الصوت'));
+                } catch (error) {
+                    console.log('فشل في تشغيل الصوت');
+                }
             }
         }
 
@@ -942,6 +904,17 @@
         window.onload = function() {
             setupQuiz();
         };
+
+        // معالجة النقر لتفعيل الصوت على الهاتف
+        document.addEventListener('click', function() {
+            // هذا يساعد في تفعيل الصوت على الأجهزة المحمولة
+            if (window.AudioContext) {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+            }
+        }, { once: true });
     </script>
 </body>
 </html>
