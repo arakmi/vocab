@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle Fruits - Jeu de Réorganisation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 415px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+            border-radius: 20px 20px 0 0;
+        }
+
+        .home-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .home-btn:hover {
+            transform: translateY(-2px) scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-top: 20px;
+        }
+
+        .game-title {
+            font-size: 24px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .level-indicator {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .game-card {
+            background: white;
+            border-radius: 18px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .puzzle-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 8px;
+            width: 100%;
+            aspect-ratio: 1;
+            margin-bottom: 25px;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #f8f9fa;
+            padding: 8px;
+            border: 3px solid #e9ecef;
+        }
+
+        .puzzle-piece {
+            background-size: 200% 200%;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid #e9ecef;
+            position: relative;
+            overflow: hidden;
+            background-color: white;
+            user-select: none;
+            touch-action: none;
+        }
+
+        .puzzle-piece:hover {
+            transform: translateY(-2px);
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .puzzle-piece.selected {
+            border-color: #feca57;
+            box-shadow: 0 0 20px rgba(254, 202, 87, 0.5);
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        .puzzle-piece.correct {
+            border-color: #4ecdc4;
+            animation: correctPulse 0.6s ease;
+        }
+
+        .puzzle-piece.shuffling {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .completed-image {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            display: none;
+            animation: zoomIn 0.8s ease;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 3px solid #4ecdc4;
+        }
+
+        @keyframes zoomIn {
+            0% { 
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            100% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-message {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            margin: 15px 0;
+            color: #4ecdc4;
+            display: none;
+            animation: bounce 0.6s ease;
+            padding: 15px;
+            background: linear-gradient(135deg, rgba(78, 205, 196, 0.1), rgba(68, 160, 141, 0.1));
+            border-radius: 12px;
+            border: 2px solid rgba(78, 205, 196, 0.3);
+        }
+
+        @keyframes bounce {
+            0%, 20%, 60%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            80% { transform: translateY(-5px); }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            display: none;
+        }
+
+        .next-btn.show {
+            display: block;
+        }
+
+        .game-over {
+            text-align: center;
+            padding: 40px 20px;
+            display: none;
+        }
+
+        .game-over.show {
+            display: block;
+        }
+
+        .game-over h2 {
+            color: #4ecdc4;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 10px;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
+        }
+
+        .instruction-text {
+            color: #666;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-title {
+                font-size: 20px;
+            }
+            
+            .puzzle-grid {
+                gap: 5px;
+                padding: 5px;
+            }
+            
+            .btn {
+                padding: 12px 16px;
+                font-size: 12px;
+            }
+            
+            .container {
+                padding: 20px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Bouton d'accueil -->
+        <button class="home-btn" onclick="goHome()" title="Page d'accueil">🏠</button>
+
+        <!-- Écran de jeu -->
+        <div id="game-screen">
+            <div class="header">
+                <h1 class="game-title">Puzzle Légumes</h1>
+                <div class="level-indicator">Niveau: <span id="level">1</span></div>
+                <p class="subtitle">Réorganisez les pièces pour former l'image complète</p>
+            </div>
+
+            <div class="game-card">
+                <div class="instruction-text">Cliquez sur deux pièces pour les échanger</div>
+                
+                <div id="puzzleGrid" class="puzzle-grid"></div>
+                <img id="completedImage" class="completed-image" alt="Image complète">
+                <div id="successMessage" class="success-message">🎉 Excellent! Bien joué! 🎉</div>
+                
+                <div class="controls">
+                    <button id="shuffleBtn" class="btn" onclick="shufflePieces()">Mélanger</button>
+                    <button id="nextBtn" class="btn next-btn" onclick="nextLevel()">Niveau Suivant</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Écran de fin de jeu -->
+        <div id="gameOver" class="game-over">
+            <h2>🎊 Félicitations! 🎊</h2>
+            <p>Vous avez terminé tous les niveaux avec succès!</p>
+            <button class="restart-btn" onclick="restartGame()">🔄 Recommencer</button>
+        </div>
+    </div>
+
+    <script>
+        const images = [
+            { src: 'radis.jpg', name: 'image', french: 'radis' },
+            { src: 'artichaut.jpg', name: 'image', french: 'artichaut' },
+            { src: 'aubergine.jpg', name: 'image', french: 'aubergine' },
+            { src: 'betterave.jpg', name: 'image', french: 'betterave' },
+            { src: 'brocoli.jpg', name: 'image', french: 'brocoli' },
+            { src: 'carotte.jpg', name: 'image', french: 'carotte' },
+            { src: 'buttenut.jpg', name: 'image', french: 'buttenut' },
+            { src: 'champignons.jpg', name: 'image', french: 'champignons' },
+            { src: 'chou-fleur.jpg', name: 'image', french: 'chou fleur' },
+            { src: 'chou-rouge.jpg', name: 'image', french: 'chou-rouge' },
+            { src: 'Concombre.jpg', name: 'image', french: 'Concombre' },
+            { src: 'cornichon.jpg', name: 'image', french: 'cornichon' },
+            { src: 'courgette.jpg', name: 'image', french: 'courgette' },
+            { src: 'fenouil.jpg', name: 'image', french: 'fenouil' },
+            { src: 'haricot-vert.jpg', name: 'image', french: 'haricot-vert' },
+            { src: 'mais.jpg', name: 'image', french: 'mais' },
+            { src: 'navet.jpg', name: 'image', french: 'navet' },
+            { src: 'oignon.jpg', name: 'image', french: 'oignon' },
+            { src: 'paiment.jpg', name: 'image', french: 'paiment' },
+            { src: 'patate-douce.jpg', name: 'image', french: 'patate-douce' },
+            { src: 'persil.jpg', name: 'image', french: 'persil' },
+            { src: 'petit-pois.jpg', name: 'image', french: 'petit-pois' },
+            { src: 'poivron.jpg', name: 'image', french: 'poivron' },
+            { src: 'pomme_de_terre.jpg', name: 'image', french: 'pomme_de_terre' },
+            { src: 'potiron.jpg', name: 'image', french: 'potiron' },
+            { src: 'radis-blanc.jpg', name: 'image', french: 'radis-blanc' },
+            { src: 'salade.jpg', name: 'image', french: 'salade' },
+            { src: 'tomate.jpg', name: 'image', french: 'tomate' }
+        ];
+
+        let currentLevel = 0;
+        let currentPieces = [];
+        let selectedPiece = null;
+        let isGameComplete = false;
+        let isShuffling = false;
+        let currentImageData = null;
+        let correctOrder = [0, 1, 2, 3];
+        let currentOrder = [0, 1, 2, 3];
+
+        function initGame() {
+            currentLevel = 0;
+            isGameComplete = false;
+            isShuffling = false;
+            document.getElementById('game-screen').style.display = 'block';
+            document.getElementById('gameOver').classList.remove('show');
+            loadLevel();
+        }
+
+        function loadLevel() {
+            if (currentLevel >= images.length) {
+                showGameOver();
+                return;
+            }
+
+            currentImageData = images[currentLevel];
+            document.getElementById('level').textContent = currentLevel + 1;
+            
+            // Réinitialiser l'affichage
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('nextBtn').classList.remove('show');
+            document.getElementById('completedImage').style.display = 'none';
+            document.getElementById('puzzleGrid').style.display = 'grid';
+            selectedPiece = null;
+            isGameComplete = false;
+
+            // Créer les pièces du puzzle
+            createPuzzlePieces();
+            
+            // Mélanger automatiquement au début avec un délai
+            setTimeout(() => {
+                shufflePieces();
+            }, 800);
+        }
+
+        function createPuzzlePieces() {
+            const grid = document.getElementById('puzzleGrid');
+            grid.innerHTML = '';
+            currentPieces = [];
+            correctOrder = [0, 1, 2, 3];
+            currentOrder = [0, 1, 2, 3];
+
+            // Créer 4 pièces (2x2)
+            for (let i = 0; i < 4; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'puzzle-piece';
+                piece.dataset.originalIndex = i;
+                piece.dataset.currentPosition = i;
+                
+                // Calculer la position de la pièce dans la grille
+                const row = Math.floor(i / 2);
+                const col = i % 2;
+                
+                // Position de l'arrière-plan pour cette pièce
+                const bgPosX = col * -100; // -0% ou -100%
+                const bgPosY = row * -100; // -0% ou -100%
+                
+                // Configurer l'affichage de la pièce
+                setupPieceDisplay(piece, i, bgPosX, bgPosY);
+                
+                piece.addEventListener('click', () => selectPiece(piece));
+                
+                grid.appendChild(piece);
+                currentPieces.push(piece);
+            }
+        }
+
+        function setupPieceDisplay(piece, index, bgPosX, bgPosY) {
+            // Essayer d'afficher l'image
+            const testImg = new Image();
+            testImg.onload = function() {
+                piece.style.backgroundImage = `url(${currentImageData.src})`;
+                piece.style.backgroundPosition = `${bgPosX}% ${bgPosY}%`;
+                piece.style.backgroundSize = '200% 200%';
+                piece.innerHTML = '';
+            };
+            testImg.onerror = function() {
+                // Si l'image ne charge pas, afficher un emoji
+                piece.style.backgroundImage = 'none';
+                piece.innerHTML = '🍎';
+                piece.style.display = 'flex';
+                piece.style.alignItems = 'center';
+                piece.style.justifyContent = 'center';
+                piece.style.fontSize = '40px';
+            };
+            testImg.src = currentImageData.src;
+        }
+
+        function selectPiece(piece) {
+            if (isGameComplete || isShuffling) return;
+
+            if (selectedPiece === null) {
+                // Sélectionner la première pièce
+                selectedPiece = piece;
+                piece.classList.add('selected');
+            } else if (selectedPiece === piece) {
+                // Désélectionner si on clique sur la même pièce
+                selectedPiece.classList.remove('selected');
+                selectedPiece = null;
+            } else {
+                // Échanger les deux pièces
+                swapPieces(selectedPiece, piece);
+                selectedPiece.classList.remove('selected');
+                selectedPiece = null;
+                
+                // Vérifier si le puzzle est résolu après l'échange
+                setTimeout(() => {
+                    checkWin();
+                }, 300);
+            }
+        }
+
+        function swapPieces(piece1, piece2) {
+            // Obtenir les positions actuelles
+            const pos1 = parseInt(piece1.dataset.currentPosition);
+            const pos2 = parseInt(piece2.dataset.currentPosition);
+            
+            // Échanger les positions d'arrière-plan et le contenu
+            const tempBgPos = piece1.style.backgroundPosition;
+            const tempBgImage = piece1.style.backgroundImage;
+            const tempContent = piece1.innerHTML;
+            
+            piece1.style.backgroundPosition = piece2.style.backgroundPosition;
+            piece1.style.backgroundImage = piece2.style.backgroundImage;
+            piece1.innerHTML = piece2.innerHTML;
+            
+            piece2.style.backgroundPosition = tempBgPos;
+            piece2.style.backgroundImage = tempBgImage;
+            piece2.innerHTML = tempContent;
+            
+            // Mettre à jour les positions dans l'ordre actuel
+            piece1.dataset.currentPosition = pos2;
+            piece2.dataset.currentPosition = pos1;
+            
+            // Mettre à jour l'ordre actuel
+            const index1 = currentOrder.indexOf(pos1);
+            const index2 = currentOrder.indexOf(pos2);
+            currentOrder[index1] = pos2;
+            currentOrder[index2] = pos1;
+        }
+
+        function shufflePieces() {
+            if (isGameComplete || isShuffling) return;
+            
+            isShuffling = true;
+            document.getElementById('shuffleBtn').disabled = true;
+            
+            // Ajouter la classe de mélange
+            currentPieces.forEach(piece => {
+                piece.classList.add('shuffling');
+            });
+            
+            // Effectuer plusieurs échanges aléatoires
+            let shuffleCount = 0;
+            const maxShuffles = 20;
+            
+            const shuffleInterval = setInterval(() => {
+                const piece1 = currentPieces[Math.floor(Math.random() * 4)];
+                const piece2 = currentPieces[Math.floor(Math.random() * 4)];
+                
+                if (piece1 !== piece2) {
+                    swapPieces(piece1, piece2);
+                }
+                
+                shuffleCount++;
+                
+                if (shuffleCount >= maxShuffles) {
+                    clearInterval(shuffleInterval);
+                    
+                    // Retirer la classe de mélange
+                    setTimeout(() => {
+                        currentPieces.forEach(piece => {
+                            piece.classList.remove('shuffling');
+                        });
+                        
+                        isShuffling = false;
+                        document.getElementById('shuffleBtn').disabled = false;
+                        
+                        // Réinitialiser la sélection
+                        if (selectedPiece) {
+                            selectedPiece.classList.remove('selected');
+                            selectedPiece = null;
+                        }
+                    }, 300);
+                }
+            }, 100);
+        }
+
+        function checkWin() {
+            if (isShuffling) return;
+            
+            // Vérifier si toutes les pièces sont dans le bon ordre
+            let isCorrect = true;
+            
+            for (let i = 0; i < currentPieces.length; i++) {
+                const piece = currentPieces[i];
+                const originalIndex = parseInt(piece.dataset.originalIndex);
+                const currentPosition = parseInt(piece.dataset.currentPosition);
+                
+                if (originalIndex !== currentPosition) {
+                    isCorrect = false;
+                    break;
+                }
+            }
+
+            if (isCorrect) {
+                showSuccess();
+            }
+        }
+
+        function showSuccess() {
+            if (isGameComplete) return;
+            
+            isGameComplete = true;
+            
+            // Ajouter l'effet de succès aux pièces
+            currentPieces.forEach(piece => {
+                piece.classList.add('correct');
+                piece.style.pointerEvents = 'none';
+            });
+
+            // Désactiver le bouton de mélange
+            document.getElementById('shuffleBtn').disabled = true;
+
+            // Afficher l'image complète après un délai
+            setTimeout(() => {
+                document.getElementById('puzzleGrid').style.display = 'none';
+                const completedImg = document.getElementById('completedImage');
+                completedImg.src = currentImageData.src;
+                
+                // Gestion d'erreur pour l'image complète
+                completedImg.onerror = function() {
+                    this.style.display = 'none';
+                    document.getElementById('puzzleGrid').style.display = 'grid';
+                };
+                
+                completedImg.style.display = 'block';
+                
+                // Afficher le message de succès avec le nom de la fruit
+                const successMessage = document.getElementById('successMessage');
+                successMessage.innerHTML = `🎉 ${currentImageData.french} 🎉`;
+                successMessage.style.display = 'block';
+                document.getElementById('nextBtn').classList.add('show');
+                
+                // Lire le nom du fruit avec fichier audio et synthèse vocale
+                playFruitAudio(currentImageData.french);
+                
+                // Créer l'effet confetti
+                createConfetti();
+            }, 800);
+        }
+
+        function playFruitAudio(fruitName) {
+            // D'abord essayer de jouer le fichier audio MP3
+            const audioFileName = currentImageData.src.replace('.jpg', '.mp3');
+            const audio = new Audio(audioFileName);
+            
+            // Gérer le succès et l'échec du fichier audio
+            audio.addEventListener('canplaythrough', () => {
+                audio.play().catch(() => {
+                    // Si la lecture du fichier audio échoue, utiliser la synthèse vocale
+                    speakFruitName(fruitName);
+                });
+            });
+            
+            audio.addEventListener('error', () => {
+                // Si le fichier audio n'existe pas, utiliser la synthèse vocale
+                speakFruitName(fruitName);
+            });
+            
+            // Charger le fichier audio
+            audio.load();
+        }
+
+        function speakFruitName(fruitName) {
+            if ('speechSynthesis' in window) {
+                // Arrêter toute synthèse vocale en cours
+                speechSynthesis.cancel();
+                
+                setTimeout(() => {
+                    const utterance = new SpeechSynthesisUtterance(fruitName);
+                    utterance.lang = 'fr-FR';
+                    utterance.rate = 0.8;
+                    utterance.pitch = 1.1;
+                    utterance.volume = 1;
+                    
+                    speechSynthesis.speak(utterance);
+                }, 200);
+            }
+        }
+
+        function createConfetti() {
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#feca57', '#f0932b', '#eb4d4b', '#6c5ce7'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.top = '-10px';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animation = `confetti-fall ${2 + Math.random() * 2}s linear forwards`;
+                    
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        if (confetti.parentNode) {
+                            confetti.remove();
+                        }
+                    }, 4000);
+                }, i * 80);
+            }
+        }
+
+        function nextLevel() {
+            currentLevel++;
+            isGameComplete = false;
+            isShuffling = false;
+            document.getElementById('shuffleBtn').disabled = false;
+            loadLevel();
+        }
+
+        function showGameOver() {
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('gameOver').classList.add('show');
+            
+            // Message de félicitations vocal
+            if ('speechSynthesis' in window) {
+                setTimeout(() => {
+                    const utterance = new SpeechSynthesisUtterance('Félicitations! Vous avez terminé tous les niveaux!');
+                    utterance.lang = 'fr-FR';
+                    utterance.rate = 0.9;
+                    speechSynthesis.speak(utterance);
+                }, 500);
+            }
+        }
+
+        function restartGame() {
+            initGame();
+        }
+
+        function goHome() {
+            // Essayer plusieurs méthodes pour revenir à la page précédente
+            if (window.history.length > 1) {
+                window.history.back();
+            } else if (window.opener) {
+                window.close();
+            } else {
+                // Si aucune des méthodes précédentes ne fonctionne
+                window.location.href = 'about:blank';
+            }
+        }
+
+        // Démarrer le jeu au chargement de la page
+        window.addEventListener('load', function() {
+            initGame();
+        });
+
+        // Empêcher la sélection de texte sur mobile
+        document.addEventListener('selectstart', function(e) {
+            e.preventDefault();
+        });
+
+        // Gestion des événements tactiles pour mobile
+        document.addEventListener('touchstart', function() {
+            // Activer le contexte audio sur mobile
+            if (typeof(AudioContext) !== "undefined") {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+            }
+        }, { once: true });
+    </script>
+</body>
+</html>
